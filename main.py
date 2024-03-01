@@ -20,6 +20,10 @@ root_topic = "msh/ANZ/2/c/"
 channel = "LongFast"
 key = "1PG7OiApB1nwvP+rz05pAQ=="
 
+padded_key = key.ljust(len(key) + ((4 - (len(key) % 4)) % 4), '=')
+replaced_key = padded_key.replace('-', '+').replace('_', '/')
+key = replaced_key
+
 broadcast_id = 4294967295
 
 # Convert hex to int and remove '!'
