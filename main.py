@@ -90,7 +90,7 @@ def decode_encrypted(message_packet):
     except Exception as e:
         print(f"Decryption failed: {str(e)}")
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, rc, properties):
     if rc == 0:
         print(f"Connected to {MQTT_BROKER} on topic {channel}")
     else:
@@ -111,7 +111,9 @@ def on_message(client, userdata, msg):
         decode_encrypted(message_packet)
 
 if __name__ == '__main__':
-    client = mqtt.Client(client_id="", clean_session=True, userdata=None)
+    # client = mqtt.Client(client_id="", clean_session=True, userdata=None)
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+
     client.on_connect = on_connect
     client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
