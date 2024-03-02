@@ -191,5 +191,6 @@ if __name__ == '__main__':
     # message = "ADD YOUR MESSAGE HERE"
 
     publish_message(broadcast_id, message)
+    client.disconnect()
 
 
