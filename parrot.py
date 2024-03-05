@@ -159,7 +159,7 @@ def process_message(mp, text_payload, is_encrypted):
                 print(mp)
 
                 time.sleep(1)
-                publish_message(int({mp_from}), f'PARROT:{text_payload}')
+                publish_message(int(mp_from), f'PARROT:{text_payload}')
 
     # print(known_id_list)
 
