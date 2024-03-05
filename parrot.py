@@ -26,16 +26,18 @@ key = replaced_key
 
 broadcast_id = 4294967295
 
-node_number = 2882396642 
+# Convert hex to int and remove '!'
+node_number = 2882396642 # int('abcd', 16)
 
-def encode_node_id(node_number):
+
+def create_node_id(node_number):
     return f"!{hex(node_number)[2:]}"
 
 def decode_node_id(node_id):
     hex_string = node_id[1:]  # Removing the '!' character
     return int(hex_string, 16)
 
-node_id = encode_node_id(node_number)
+node_id = create_node_id(node_number)
 node_name = node_id
 
 print(f'AUTO-ROUTER NODE-ID: {node_id}')
@@ -45,6 +47,8 @@ def set_topic():
     node_name = '!' + hex(node_number)[2:]
     subscribe_topic = root_topic + channel + "/#"
     publish_topic = root_topic + channel + "/" + node_name
+
+
 
 def current_time():
     current_time_seconds = time.time()
@@ -74,10 +78,7 @@ def direct_message(destination_id):
 
 def publish_message(destination_id, message):
     global key
-
-    # if not client.is_connected():
-    #     connect_mqtt()
-
+    # print(int(destination_id[1:], 16))
     message_text = message
     if message_text:
         encoded_message = mesh_pb2.Data()
@@ -91,6 +92,8 @@ def generate_mesh_packet(destination_id, encoded_message):
     mesh_packet = mesh_pb2.MeshPacket()
 
     setattr(mesh_packet, "from", node_number)
+    # setattr(mesh_packet, "long_name", "AUTO-REPLY")
+
     mesh_packet.id = random.getrandbits(32)
     mesh_packet.to = destination_id
     mesh_packet.want_ack = False
@@ -134,6 +137,8 @@ def process_message(mp, text_payload, is_encrypted):
     mp_from = getattr(mp, "from")
     if mp_id not in known_id_list:
         known_id_list.append(mp_id)
+        print(known_id_list)
+        print(mp)
         text = {
             "message": text_payload,
             "from": getattr(mp, "from"),
@@ -141,25 +146,23 @@ def process_message(mp, text_payload, is_encrypted):
             "to": getattr(mp, "to")
         }
 
-        if encode_node_id(getattr(mp, "to")) == node_id:
-            if getattr(mp, "hop_limit") == 3:
-                # if getattr()
-                # print()
+        if create_node_id(getattr(mp, "to")) == node_id:
+            # if getattr(mp, "hop_limit") == 3:
 
-                notification.notify(
-                title = f"{getattr(mp, 'from')}",
-                message = f"{text_payload}",
-                timeout = 10
-                )
+            notification.notify(
+            title = f"{getattr(mp, 'from')}",
+            message = f"{text_payload}",
+            timeout = 10
+            )
 
-                print("REPLY DETAILS")
-                print(f'TO: {mp_from}')
-                print(f'FROM: {mp_to}')
-                print(f'MESSAGE TEXT: {text_payload}')
-                print(mp)
+            print("REPLY DETAILS")
+            print(f'TO: {mp_from}')
+            print(f'FROM: {mp_to}')
+            print(f'MESSAGE TEXT: {text_payload}')
+            print(mp)
 
-                time.sleep(1)
-                publish_message(int(mp_from), f'PARROT:{text_payload}')
+            time.sleep(1)
+            publish_message(mp_from, f'PARROT:{text_payload}')
 
     # print(known_id_list)
 
@@ -191,6 +194,14 @@ def decode_encrypted(message_packet):
         elif message_packet.decoded.portnum == portnums_pb2.NODEINFO_APP:
                 info = mesh_pb2.User()
                 info.ParseFromString(message_packet.decoded.payload)
+                # print(info)
+
+                # notification.notify(
+                # title = "Meshtastic",
+                # message = f"{info}",
+                # timeout = 10
+                # )
+
 
 
     except Exception as e:
